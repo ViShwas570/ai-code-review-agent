@@ -1,20 +1,14 @@
+def format_markdown(results):
+    markdown = "# AI Code Review Report\n\n"
 
-def generate_markdown(results):
-    md = "# AI Code Review Report\\n\\n"
+    for item in results:
+        markdown += f"## {item['file']}\n\n"
 
-    for file_result in results:
-        md += f"## {file_result['file']}\\n\\n"
+        for comment in item["review"]["comments"]:
+            markdown += f"### Issue\n{comment['issue']}\n\n"
+            markdown += f"**Severity:** {comment['severity']}\n\n"
+            markdown += f"**Confidence:** {comment['confidence']}%\n\n"
+            markdown += f"**Suggestion:** {comment['suggestion']}\n\n"
+            markdown += "---\n\n"
 
-        for comment in file_result["review"]["comments"]:
-            verify = "⚠️ VERIFY THIS" if comment["confidence"] < 60 else ""
-
-            md += f"""
-- **Issue:** {comment['issue']}
-- **Severity:** {comment['severity']}
-- **Confidence:** {comment['confidence']}%
-- **Suggestion:** {comment['suggestion']}
-{verify}
-
-"""
-
-    return md
+    return markdown
