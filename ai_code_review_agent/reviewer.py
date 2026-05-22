@@ -1,26 +1,22 @@
 import json
 import os
 from dotenv import load_dotenv
-from openai import OpenAI
+import google.generativeai as genai
 from prompts import REVIEW_PROMPT
 
 load_dotenv()
 
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+model = genai.GenerativeModel("gemini-1.5-flash")
+
 
 def review_code(code):
     prompt = REVIEW_PROMPT.format(code=code)
 
-    response = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "system", "content": "You are a senior software engineer."},
-            {"role": "user", "content": prompt}
-        ],
-        temperature=0.2
-    )
+    response = model.generate_content(prompt)
 
-    text = response.choices[0].message.content
+    text = response.text
 
     try:
         return json.loads(text)
