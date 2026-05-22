@@ -8,7 +8,7 @@ load_dotenv()
 
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-model = genai.GenerativeModel("gemini-pro")
+model = genai.GenerativeModel("models/gemini-1.5-flash")
 
 
 def review_code(code):
@@ -27,7 +27,7 @@ def review_code(code):
                     "issue": "Could not parse structured response",
                     "severity": "Medium",
                     "confidence": 40,
-                    "suggestion": "Verify manually"
+                    "suggestion": text
                 }
             ]
         }
