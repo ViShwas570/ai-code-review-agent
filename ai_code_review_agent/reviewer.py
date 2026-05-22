@@ -1,22 +1,38 @@
 import json
 import os
+import requests
 from dotenv import load_dotenv
-import google.generativeai as genai
 from prompts import REVIEW_PROMPT
 
 load_dotenv()
 
-genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
-
-model = genai.GenerativeModel("models/gemini-1.5-flash")
+API_KEY = os.getenv("GEMINI_API_KEY")
 
 
 def review_code(code):
     prompt = REVIEW_PROMPT.format(code=code)
 
-    response = model.generate_content(prompt)
+    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
 
-    text = response.text
+    headers = {
+        "Content-Type": "application/json"
+    }
+
+    data = {
+        "contents": [
+            {
+                "parts": [
+                    {"text": prompt}
+                ]
+            }
+        ]
+    }
+
+    response = requests.post(url, headers=headers, json=data)
+
+    result = response.json()
+
+    text = result["candidates"][0]["content"]["parts"][0]["text"]
 
     try:
         return json.loads(text)
@@ -24,9 +40,9 @@ def review_code(code):
         return {
             "comments": [
                 {
-                    "issue": "Could not parse structured response",
+                    "issue": "Could not parse response",
                     "severity": "Medium",
-                    "confidence": 40,
+                    "confidence": 50,
                     "suggestion": text
                 }
             ]

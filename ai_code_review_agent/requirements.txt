@@ -3,3 +3,4 @@ openai
 gitpython
 python-dotenv
 google-generativeai
+requests
