@@ -1,4 +1,4 @@
-def format_markdown(results):
+def generate_markdown(results):
     markdown = "# AI Code Review Report\n\n"
 
     for item in results:
