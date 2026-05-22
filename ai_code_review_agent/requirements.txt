@@ -1,5 +1,4 @@
-streamlit==1.45.1
+streamlit
 gitpython
 python-dotenv
-google-generativeai
-protobuf==5.29.3
+google-generativeai==0.3.2
