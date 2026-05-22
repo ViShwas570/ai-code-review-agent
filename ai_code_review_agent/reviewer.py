@@ -6,46 +6,27 @@ from prompts import REVIEW_PROMPT
 
 load_dotenv()
 
-# Configure Gemini API
 genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
 
-# Load model
-model = genai.GenerativeModel("gemini-1.5-flash")
-
+model = genai.GenerativeModel("gemini-1.5-flash-latest")
 
 def review_code(code):
     prompt = REVIEW_PROMPT.format(code=code)
 
+    response = model.generate_content(prompt)
+
+    text = response.text
+
     try:
-        response = model.generate_content(prompt)
-
-        # Gemini response text
-        text = response.text
-
-        # Convert AI response into JSON
-        try:
-            return json.loads(text)
-
-        except:
-            return {
-                "comments": [
-                    {
-                        "issue": "Could not parse AI response",
-                        "severity": "Medium",
-                        "confidence": 70,
-                        "suggestion": text
-                    }
-                ]
-            }
-
-    except Exception as e:
+        return json.loads(text)
+    except:
         return {
             "comments": [
                 {
-                    "issue": str(e),
+                    "issue": text,
                     "severity": "High",
                     "confidence": 95,
-                    "suggestion": "Check Gemini API key or model configuration"
+                    "suggestion": "Check Gemini API response formatting"
                 }
             ]
         }
