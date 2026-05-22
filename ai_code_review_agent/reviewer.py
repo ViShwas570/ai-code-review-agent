@@ -1,49 +1,51 @@
 import json
 import os
-import requests
 from dotenv import load_dotenv
+import google.generativeai as genai
 from prompts import REVIEW_PROMPT
 
 load_dotenv()
 
-API_KEY = os.getenv("GEMINI_API_KEY")
+# Configure Gemini API
+genai.configure(api_key=os.getenv("GEMINI_API_KEY"))
+
+# Load model
+model = genai.GenerativeModel("gemini-1.5-flash")
 
 
 def review_code(code):
     prompt = REVIEW_PROMPT.format(code=code)
 
-    url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={API_KEY}"
+    try:
+        response = model.generate_content(prompt)
 
-    headers = {
-        "Content-Type": "application/json"
-    }
+        # Gemini response text
+        text = response.text
 
-    data = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": prompt}
+        # Convert AI response into JSON
+        try:
+            return json.loads(text)
+
+        except:
+            return {
+                "comments": [
+                    {
+                        "issue": "Could not parse AI response",
+                        "severity": "Medium",
+                        "confidence": 70,
+                        "suggestion": text
+                    }
                 ]
             }
-        ]
-    }
 
-    response = requests.post(url, headers=headers, json=data)
-
-    result = response.json()
-
-    text = result["candidates"][0]["content"]["parts"][0]["text"]
-
-    try:
-        return json.loads(text)
-    except:
+    except Exception as e:
         return {
             "comments": [
                 {
-                    "issue": "Could not parse response",
-                    "severity": "Medium",
-                    "confidence": 50,
-                    "suggestion": text
+                    "issue": str(e),
+                    "severity": "High",
+                    "confidence": 95,
+                    "suggestion": "Check Gemini API key or model configuration"
                 }
             ]
         }
